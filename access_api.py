@@ -6,11 +6,11 @@ import re
 
 def get_workflow(repo_name):
     url = "https://api.github.com/repos/" + repo_name + "/actions/workflows"
-    headers = {"Authorization": "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",
+    headers = {"Authorization": "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",
                "Accept": "application/vnd.github+json", }
     response = requests.get(url, headers=headers)
     data_ori = response.json()
-    g = Github("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")
+    g = Github("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")
     repo = g.get_repo(repo_name)
     workflow_runs = repo.get_workflows()
     workflow_list = {}
