@@ -3,14 +3,18 @@ import requests
 from github import Github
 import re
 
+token = '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'
+cookie = '_ga=GA1.2.2015594702.1511353957; _device_id=b42dbb502fa0351a74be9857a393ff2e; _octo=GH1.1.14320389.1643447003; user_session=Rgjwhvu_lt_Qxf_vEh7-L2pdpEbo85YnhfdOJ39LGLSlV55X; __Host-user_session_same_site=Rgjwhvu_lt_Qxf_vEh7-L2pdpEbo85YnhfdOJ39LGLSlV55X; logged_in=yes; dotcom_user=XIAOXIAODESHUTONG; color_mode={"color_mode":"auto","light_theme":{"name":"light","color_mode":"light"},"dark_theme":{"name":"dark","color_mode":"dark"}}; preferred_color_mode=light; tz=Asia/Shanghai; has_recent_activity=1; _gh_sess=WrM6IFKwMNVp48JkcoancoqEI3qFPUqJKD1ZWqNZH+TcaOxW7jxbKFfuqMJASD1hBrqPA65iLCBKWETiMdIR0+80q/5z4zsegPHbtcQY9UaE14QjzUQj3PrTtUCUp/fadI3FwFdHuBg5B8q9lgTnXNV5q1TItPLytMrr84GsbZ1Kp3SyE7VWbOOyUAb7WgmGShsddYCEiqep4g67WieaMdHO5NkeiRbQuzXMb5EWhEhhUi0CYM32o/Zs5E0t4aF3EBVslU25QMSxy+EkAU/ah25pkY7BGzYXnIZg8VRExOsRzstFWySbBCIThYTAdDGS9alTMC+o2yMg3c4NIpal3Z3H8d4iz+wwZ1ZbHNMrHlQu3nlmIz+146wcQSx5cO5IJOCK+nO51mlNPrZJlI2EcA==--cG/GcD9+xJp39HE4--eOqNAMYzRAbAq/0NkFWVZA=='
+user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36'
+
 
 def get_workflow(repo_name):
     url = "https://api.github.com/repos/" + repo_name + "/actions/workflows"
-    headers = {"Authorization": "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",
+    headers = {"Authorization": token,
                "Accept": "application/vnd.github+json", }
     response = requests.get(url, headers=headers)
     data_ori = response.json()
-    g = Github("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")
+    g = Github(token)
     repo = g.get_repo(repo_name)
     workflow_runs = repo.get_workflows()
     workflow_list = {}
@@ -35,34 +39,49 @@ def get_workflow(repo_name):
 
 
 def download_zip(repo_name, down_url):
-    headers = {
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"}
-    session = requests.session()
-    # 下载页面
-    down_response = session.get(down_url, headers=headers)
-    flag = re.findall(r'" class="mb-1">(.*)</h3>', down_response.text)
+    headers = {"user-agent": user_agent}
+    down_response, flag = get_required_data(down_url, headers)
+    headers["cookie"] = cookie
     if len(flag) != 0 and flag[0] == "There are no workflow runs yet.":
         return True
     id_co = re.findall('(?<=actions/workflow-run/)\d+', down_response.text)
-    # print(id_co)
     work_flow_name = re.findall(r'<span class="text-bold" >(.*)</span>', down_response.text)
     for log_id, name in zip(id_co, work_flow_name):
-        project_name = repo_name.split("/")[1]
-        path = project_name + "\\" + name
-        is_exists = os.path.exists(path)
-        if not is_exists:
-            os.mkdir(path)  # 正常
-        cookie = '_ga=GA1.2.2015594702.1511353957; _device_id=b42dbb502fa0351a74be9857a393ff2e; _octo=GH1.1.14320389.1643447003; user_session=Rgjwhvu_lt_Qxf_vEh7-L2pdpEbo85YnhfdOJ39LGLSlV55X; __Host-user_session_same_site=Rgjwhvu_lt_Qxf_vEh7-L2pdpEbo85YnhfdOJ39LGLSlV55X; logged_in=yes; dotcom_user=XIAOXIAODESHUTONG; has_recent_activity=1; color_mode={"color_mode":"auto","light_theme":{"name":"light","color_mode":"light"},"dark_theme":{"name":"dark","color_mode":"dark"}}; preferred_color_mode=light; tz=Asia/Shanghai; _gh_sess=wwthoHf03Uyq6eb3vdMwz8LRbTXP8ZQ9tjPSzcTYki+vr862/t7sqa0XhqW58bkBYO6OsS6bFNRBTtj36nxzkbdzjWzS0TuTSirDfiOry7yp7FuVphL7q8Fj0kSJdxVXm62Ip2jUTOCEbcIWfrqTg8wa47SB0XeAbVxTwjRDXyz4XMliUC/4GSqJxf/n3LPfj1eB+wY7KB6ihDRIwq6+A0kSqnsaqJtsmpOqn+oXfvoDI+2z2+6GAZqPSmffbudNtm/F1ylgaea/yh+xV7c/JgkQj4wioP+ndVMZZcT5cok=--Pdxupc/CTLTrJJqF--yLUtajaGX3m7e4xiLFTajA=='
-        headers["cookie"] = cookie
-        down_zip_url = "https://github.com/" + repo_name + "/suites/" + log_id + "/logs?attempt=1"
-        r = requests.get(down_zip_url, headers=headers,)
-        if r.status_code == 404:
-            down_zip_url = "https://github.com/" + repo_name + "/suites/" + log_id + "/logs?attempt=2"
-            r = requests.get(down_zip_url, headers=headers, )
-        print(r)
-        with open(path + "\\" + log_id + '.zip', 'wb') as f:
-            f.write(r.content)
+        data_co = {"repo_name": repo_name, "log_id": log_id, "headers": headers,
+                   "path": repo_name.split("/")[1] + "\\" + name}
+        create_folder(data_co)
+        data_co["zip_package"] = download(data_co, "1")
+        if data_co["zip_package"].status_code == 404:
+            data_co["zip_package"] = download(data_co, "2")
+        save_zip_file(data_co)
+        print(data_co["zip_package"])
     return False
+
+
+def get_required_data(down_url, headers):
+    session = requests.session()
+    down_response = session.get(down_url, headers=headers)
+    flag = re.findall(r'" class="mb-1">(.*)</h3>', down_response.text)
+    return down_response, flag
+
+
+def create_folder(data_co):
+    is_exists = os.path.exists(data_co["path"])
+    if not is_exists:
+        os.mkdir(data_co["path"])
+
+
+def download(data_co, num):
+    down_zip_url = "https://github.com/" + data_co["repo_name"] + "/suites/" + data_co["log_id"] + "/logs?attempt=" + num
+    print(down_zip_url)
+    print(data_co["headers"])
+    zip_package = requests.get(down_zip_url, headers=data_co["headers"], )
+    return zip_package
+
+
+def save_zip_file(data_co):
+    with open(data_co["path"] + "\\" + data_co["log_id"] + '.zip', 'wb') as f:
+        f.write(data_co["zip_package"].content)
 
 
 def run_get_log(repo_name):
