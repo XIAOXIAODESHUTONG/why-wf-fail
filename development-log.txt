@@ -1,0 +1,11 @@
+week1:
+The main purpose is to implement functions that fetch workflow and log files from the GitHub repository.
+problem：
+I can get the workflow name and content through GitHub's official rest-api without any problem, but whenever I call the api to get the log file it shows that I need admin rights.
+solution:
+I first manually download the log file from the UI, then get the download address and header from it, and then use a crawler to loop through the packaged log files from GitHub.
+
+week2:
+The main purpose of this week was to format the files fetched from GitHub and extract the data from within the various folders into the dataframe.
+problem:
+Since the GitHub log download link will expire with the passage of time, resulting in the previously crawled data actually depositing an empty zip file, although the crawl will show a successful crawl. So the first step is to clear the empty zip file.
