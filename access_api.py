@@ -3,7 +3,9 @@ import requests
 from github import Github
 import re
 
-token = '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'
+token = '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'
+token_new = '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'
+fine_grained_token = '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'
 cookie = '_ga=GA1.2.2015594702.1511353957; _device_id=b42dbb502fa0351a74be9857a393ff2e; _octo=GH1.1.14320389.1643447003; user_session=Rgjwhvu_lt_Qxf_vEh7-L2pdpEbo85YnhfdOJ39LGLSlV55X; __Host-user_session_same_site=Rgjwhvu_lt_Qxf_vEh7-L2pdpEbo85YnhfdOJ39LGLSlV55X; logged_in=yes; dotcom_user=XIAOXIAODESHUTONG; color_mode={"color_mode":"auto","light_theme":{"name":"light","color_mode":"light"},"dark_theme":{"name":"dark","color_mode":"dark"}}; preferred_color_mode=light; tz=Asia/Shanghai; has_recent_activity=1; _gh_sess=WstAZjDqOHaSgz63A4DV1ndkTcQIv77AGLltRw516OYed2Cn2RyP5qi2blMDQfzlu7kH3cYbJi5F99pZu6MMqCLRASa5wCz28xuq9lIF7Biu/wt4V1As7x5KVg9MrZuX5zsYw24AViE1fZQO9LWPZ58zuP8THz4IUuuscwLBTRnZDe6tF4V8J3NA+9MkMRCX3I18IuHLI6wpYDoQ0msGA+Wvhu1US+p/vNW+o9UM3zmQhQjRRUN2j63zqKdlGXtoaKFoSHH919zpw14Kc1QKsi/p8iSJomZYIWBDbonoQQaHFi+Yqex+sRW5DLg8y0I3u/tFEqISa1G9h52dLQl/SJO/Q6KEYSuB--vdYRwYxWF8NsyqWe--uxLRCWZJrSoGUhokqZ0ByQ=='
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36'
 
@@ -93,3 +95,23 @@ def run_get_log(repo_name):
         if stop_flag:
             print("exit ", num)
             break
+
+
+def api_log():
+    url = "https://api.github.com/repos/rust-lang/rust/actions/runs/3388085006/logs"
+    headers = {"Authorization": token_new,
+               "Accept": "application/vnd.github+json", }
+    response = requests.get(url, headers=headers)
+    data_ori = response.json()
+    print()
+    print("requested url: ", url)
+    print(data_ori)
+    url = "https://api.github.com/repos/rust-lang/rust/actions/runs/3387819190/jobs"
+    headers = {"Authorization": token_new,
+               "Accept": "application/vnd.github+json", }
+    response = requests.get(url, headers=headers)
+    data_ori = response.json()
+    print()
+    print("requested url: ", url)
+    print(data_ori)
+
