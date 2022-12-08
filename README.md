@@ -15,7 +15,8 @@ First you need to clone the entire project code and add your own GitHub token in
 - ast
 
 ## Interface Preview
-![](document\1.jpg)
+![](https://github.com/XIAOXIAODESHUTONG/why-wf-fail/raw/main/document/1.jpg
+)
 
 ## Supported Operating Systems
 - Windows 10
