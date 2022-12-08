@@ -2,3 +2,5 @@ requests
 re
 Github
 zipfile
+pandas
+ast

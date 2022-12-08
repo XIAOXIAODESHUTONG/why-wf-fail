@@ -14,5 +14,5 @@ def run():
 
 
 def get_data():
-    df = pd.read_csv('log_error.csv')
+    df = pd.read_csv('../log_error.csv')
     return df
