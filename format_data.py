@@ -5,7 +5,6 @@ import pandas as pd
 
 
 def run(name):
-    data_collection = pd.DataFrame()
     data_collection = {}
     work_flow_co = {}
     list_wf = get_file_name(name, "txt")
@@ -16,12 +15,10 @@ def run(name):
         work_flow_co[wl] = file_content
         list_log = get_file_name(name + "\\" + wl, "zip")
         for log_name in list_log:
-            # log_content = pd.DataFrame()
             flag = unzip_file(name + "\\" + wl, log_name)
             if not flag:
                 continue
             get_folder_content(file_dic, name + "\\" + wl + "\\" + log_name.split(".")[0], log_name.split(".")[0])
-            # print(file_dic)
         data_collection[wl] = file_dic
     log_df = pd.DataFrame(data_collection)
     wf_df = pd.DataFrame(work_flow_co)
@@ -29,8 +26,6 @@ def run(name):
     pd.set_option('display.max_rows', None)
     pd.set_option('max_colwidth', 100)
     pd.set_option('display.width', 1000)
-    # print(log_df)
-    # print(wf_df)
     log_df.to_csv(name + '_log.csv', index=False)
     wf_df.to_csv(name + '_workflow.csv', index=False)
 
@@ -60,22 +55,9 @@ def sort_store_data(data_co, content, step_name, file_num):
     df_co = pd.DataFrame(content)
     if step_name not in data_co:
         data = {file_num: df_co}
-        # df[file_num] = pd.DataFrame(content)
         data_co[step_name] = data
     else:
         data_co[step_name][file_num] = df_co
-        # print(data_co)
-        # data_co[step_name].insert(column=file_num, value=content)
-
-        # data_co[step_name][] = pd.Series([10, 20, 30], index=['a', 'b', 'c'])
-    # if step_name in data_co:
-    #     data_co[step_name].update({file_num: content})
-    # else:
-    #     data_co[step_name] = {}
-    # print(data_co)
-    # print(step_name)
-    # print(file_num)
-    # print(content)
 
 
 def add_top_column(df, top_col, inplace=False):
@@ -97,7 +79,6 @@ def deal_log_content(content):
         content_co.append(content)
     file_content["time_stamp"] = time_co
     file_content["log_content"] = content_co
-    df = pd.DataFrame(file_content)
     return file_content
 
 

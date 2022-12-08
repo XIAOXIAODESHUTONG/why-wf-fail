@@ -1,3 +1,4 @@
+import ast
 import os
 import re
 
@@ -5,12 +6,11 @@ import pandas as pd
 from format_data import get_file_name, get_txt_file, unzip_file
 
 
-def run(name):
-    data_collection = pd.DataFrame()
+def run(name, id_num, data_collection):
     work_flow_co = {}
     list_wf = get_file_name(name, "txt")
+    dic_path = read_path_csv(name)
     for wl in list_wf:
-        file_dic = pd.DataFrame()
         file_content = get_txt_file(name + "\\" + wl)
         wl = wl.split(".")[0]
         work_flow_co[wl] = file_content
@@ -20,16 +20,12 @@ def run(name):
             flag = unzip_file(name + "\\" + wl, log_name)
             if not flag:
                 continue
-            file_dic = get_folder_content(file_dic, name + "\\" + wl + "\\" + log_name.split(".")[0], log_name.split(".")[0])
-        pd.set_option('display.max_columns', None)
-        pd.set_option('display.max_rows', None)
-        pd.set_option('max_colwidth', 100)
-        pd.set_option('display.width', 1000)
-        print(file_dic)
-        file_dic.to_csv(name + "\\" + wl + '_log_error.csv', index=False)
+            data_collection = get_folder_content(data_collection, name + "\\" + wl + "\\" + log_name.split(".")[0],
+                                                 log_name.split(".")[0], name, id_num, dic_path, wl)
+    return data_collection
 
 
-def get_folder_content(data_co, path, log_number):
+def get_folder_content(data_co, path, log_number, repo_name, id_num, dic_path, wl):
     for file in os.listdir(path):
         # file is also the job name
         if file.endswith(".txt"):
@@ -40,14 +36,28 @@ def get_folder_content(data_co, path, log_number):
                 content = f.readlines()
                 error_coll = deal_log_content(content)
                 if len(error_coll) != 0:
-                    sub_column = {"job name": file, "log number": log_number, "file step": file_step.split(".")[0],
-                                  "error collection": error_coll}
-                    if len(data_co) == 0:
-                        data_co = pd.DataFrame(sub_column)
-                    else:
-                        data_co.loc[len(data_co)] = sub_column
+                    # sub_column = {"job name": file, "log number": log_number, "file step": file_step.split(".")[0],
+                    #               "error collection": error_coll}
+                    for error in error_coll:
+                        num = str(log_number)
+                        if num in dic_path.keys():
+                            commit = ast.literal_eval(dic_path[num])
+                            sub_column = {"repo name": repo_name, "id number": id_num, "workflow name": wl,
+                                          "workflow path": commit[3], "execution number": commit[2],
+                                          "commit message": commit[0], "commit path": commit[1],
+                                          "job name": file_step.split(".")[0], "log number": log_number,
+                                          "error message": error}
+                        else:
+                            sub_column = {"repo name": repo_name, "id number": id_num, "workflow name": wl,
+                                          "workflow path": "", "execution number": "",
+                                          "commit message": "", "commit path": " ",
+                                          "job name": file_step.split(".")[0], "log number": log_number,
+                                          "error message": error}
+                        if len(data_co) == 0:
+                            data_co = pd.DataFrame([sub_column])
+                        else:
+                            data_co.loc[len(data_co)] = sub_column
                 f.close()
-        # print(data_co)
     return data_co
 
 
@@ -55,7 +65,6 @@ def sort_store_data(data_co, content, step_name, file_num):
     df_co = pd.DataFrame(content)
     if step_name not in data_co:
         data = {file_num: df_co}
-        # df[file_num] = pd.DataFrame(content)
         data_co[step_name] = data
     else:
         data_co[step_name][file_num] = df_co
@@ -68,3 +77,12 @@ def deal_log_content(content):
         if len(error) != 0:
             error_coll.extend(error)
     return error_coll
+
+
+def read_path_csv(name):
+    dic_path = {}
+    df = pd.read_csv(name + '//log_commit_detail.csv')
+    for num, commit in zip(df["log_id"], df["commit_detail"]):
+        dic_path[str(num)] = commit
+    return dic_path
+
